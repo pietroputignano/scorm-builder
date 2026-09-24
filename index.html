@@ -75,7 +75,7 @@
         <div id="saveState" class="save-state">Anteprima locale</div>
       </div>
       <div class="preview-shell">
-        <div id="exercises-player"><p class="loading">Caricamento player…</p></div>
+        <iframe id="previewFrame" title="Anteprima esercizio bSmart" class="preview-frame"></iframe>
       </div>
       <div class="preview-note">
         La preview usa il player bSmart fornito. Per la v1 il runtime è stato adattato solo per: persistenza callback su risposta desktop e set di tessere distinto per step.
@@ -98,7 +98,8 @@
         </label>
         <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
         <label class="full completion-field">Frasi / testo
-          <textarea class="step-content" rows="5">Je [vais] à l'école.\nMarie [reste] à la maison.</textarea>
+          <textarea class="step-content" rows="5">Je [vais] à l'école.
+Marie [reste] à la maison.</textarea>
           <small>Puoi inserire più frasi nello stesso step. Ogni testo tra parentesi quadre diventa uno spazio.</small>
         </label>
         <label class="full order-field hidden">Sequenza corretta
@@ -114,7 +115,6 @@
     </article>
   </template>
 
-  <script src="player/exercises-player.runtime.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
