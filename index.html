@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>bSmart SCORM Builder</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="player/exercises-player.min.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">bSmart Labs</div>
+      <h1>SCORM Builder</h1>
+      <p>Completamento e riordino con tessere · SCORM 1.2</p>
+    </div>
+    <div class="top-actions">
+      <button id="previewBtn" class="btn secondary">Aggiorna anteprima</button>
+      <button id="exportBtn" class="btn primary">Esporta SCORM</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="editor-panel">
+      <div class="section-card">
+        <div class="section-title-row">
+          <div>
+            <div class="section-kicker">01</div>
+            <h2>Impostazioni generali</h2>
+          </div>
+        </div>
+        <div class="form-grid two">
+          <label>Titolo esercizio<input id="title" type="text" value="Completa le frasi" /></label>
+          <label>Lingua comandi
+            <select id="language">
+              <option value="it" selected>Italiano</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </label>
+          <label>Tentativi<input id="attempts" type="number" min="0" max="99" value="3" /><small>0 = illimitati</small></label>
+          <label>Soglia superamento (%)<input id="passThreshold" type="number" min="0" max="100" value="60" /></label>
+        </div>
+        <div class="check-grid">
+          <label><input id="evaluateStep" type="checkbox" checked /> Verifica per step</label>
+          <label><input id="showSolutions" type="checkbox" /> Mostra soluzioni</label>
+          <label><input id="solutionsByStep" type="checkbox" /> Soluzioni a step</label>
+          <label><input id="showReset" type="checkbox" checked /> Mostra “Azzera”</label>
+          <label><input id="showHelp" type="checkbox" checked /> Mostra aiuto</label>
+          <label><input id="showTitle" type="checkbox" checked /> Mostra titolo nel player</label>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title-row">
+          <div>
+            <div class="section-kicker">02</div>
+            <h2>Step</h2>
+            <p class="muted">Nel completamento usa <code>[testo]</code> per indicare una tessera corretta. Nel riordino separa le tessere con <code>|</code>.</p>
+          </div>
+          <button id="addStepBtn" class="btn ghost">+ Aggiungi step</button>
+        </div>
+        <div id="steps"></div>
+      </div>
+    </section>
+
+    <aside class="preview-panel">
+      <div class="preview-head">
+        <div>
+          <div class="section-kicker">ANTEPRIMA</div>
+          <h2>Player bSmart</h2>
+        </div>
+        <div id="saveState" class="save-state">Anteprima locale</div>
+      </div>
+      <div class="preview-shell">
+        <div id="exercises-player"><p class="loading">Caricamento player…</p></div>
+      </div>
+      <div class="preview-note">
+        La preview usa il player bSmart fornito. Per la v1 il runtime è stato adattato solo per: persistenza callback su risposta desktop e set di tessere distinto per step.
+      </div>
+    </aside>
+  </main>
+
+  <template id="stepTemplate">
+    <article class="step-card">
+      <div class="step-head">
+        <h3>Step <span class="step-number"></span></h3>
+        <button class="icon-btn remove-step" title="Elimina step">×</button>
+      </div>
+      <div class="form-grid">
+        <label>Modalità
+          <select class="step-mode">
+            <option value="completion">Completa con tessere</option>
+            <option value="order">Riordina / assembla frase</option>
+          </select>
+        </label>
+        <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
+        <label class="full completion-field">Frasi / testo
+          <textarea class="step-content" rows="5">Je [vais] à l'école.\nMarie [reste] à la maison.</textarea>
+          <small>Puoi inserire più frasi nello stesso step. Ogni testo tra parentesi quadre diventa uno spazio.</small>
+        </label>
+        <label class="full order-field hidden">Sequenza corretta
+          <textarea class="step-order" rows="4">Je | vais | à l'école</textarea>
+          <small>Una frase per riga. Il simbolo | separa le tessere.</small>
+        </label>
+        <label class="full">Tessere distrattrici <span class="optional">(facoltative, una per riga)</span>
+          <textarea class="step-distractors" rows="3">mange\nsuis</textarea>
+        </label>
+        <label>Suggerimento <span class="optional">(facoltativo)</span><input class="step-hint" type="text" /></label>
+      </div>
+      <div class="parsed-box"><strong>Tessere generate:</strong> <span class="parsed-tiles"></span></div>
+    </article>
+  </template>
+
+  <script src="player/exercises-player.runtime.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
