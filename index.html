@@ -12,7 +12,7 @@
     <div>
       <div class="eyebrow">bSmart Labs</div>
       <h1>SCORM Builder</h1>
-      <p>Completamento e riordino con tessere · SCORM 1.2</p>
+      <p>Tessere, media e associazioni · SCORM 1.2</p>
     </div>
     <div class="top-actions">
       <button id="previewBtn" class="btn secondary">Aggiorna anteprima</button>
@@ -58,7 +58,7 @@
           <div>
             <div class="section-kicker">02</div>
             <h2>Step</h2>
-            <p class="muted">Nel completamento usa <code>[testo]</code> per indicare una tessera corretta. Nel riordino separa le tessere con <code>|</code>.</p>
+            <p class="muted">Crea step con tessere testuali o multimediali, media audio/video e associazioni a due colonne.</p>
           </div>
           <button id="addStepBtn" class="btn ghost">+ Aggiungi step</button>
         </div>
@@ -78,7 +78,7 @@
         <iframe id="previewFrame" title="Anteprima esercizio bSmart" class="preview-frame"></iframe>
       </div>
       <div class="preview-note">
-        La preview usa il player bSmart fornito. Per la v1 il runtime è stato adattato solo per: persistenza callback su risposta desktop e set di tessere distinto per step.
+        La preview usa il player bSmart per gli step testuali e il runtime esteso bSmart per tessere multimediali, media e collegamenti.
       </div>
     </aside>
   </main>
@@ -94,6 +94,9 @@
           <select class="step-mode">
             <option value="completion">Completa con tessere</option>
             <option value="order">Riordina / assembla frase</option>
+            <option value="mediaTiles">Completa / assembla con tessere immagine o audio</option>
+            <option value="mediaChoice">Audio / video + tessere da associare</option>
+            <option value="match">Collega due colonne</option>
           </select>
         </label>
         <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
@@ -107,12 +110,88 @@ Marie [reste] à la maison.</textarea>
           <small>Una frase per riga. Il simbolo | separa le tessere.</small>
         </label>
         <label class="full">Tessere distrattrici <span class="optional">(facoltative, una per riga)</span>
-          <textarea class="step-distractors" rows="3">mange\nsuis</textarea>
+          <textarea class="step-distractors" rows="3">mange
+suis</textarea>
         </label>
         <label>Suggerimento <span class="optional">(facoltativo)</span><input class="step-hint" type="text" /></label>
+        <div class="full custom-field media-tiles-field hidden">
+          <div class="subsection-title">Tessere immagine / audio</div>
+          <label>Testo / sequenza con spazi
+            <textarea class="media-tiles-text" rows="3">Abbina [1] e poi [2].</textarea>
+            <small>Usa [1], [2], [3]… per indicare gli slot. Ogni numero corrisponde alla tessera corretta con lo stesso numero.</small>
+          </label>
+          <div class="media-tiles-list"></div>
+          <button type="button" class="mini-btn add-media-tile">+ Aggiungi tessera</button>
+        </div>
+        <div class="full custom-field media-choice-field hidden">
+          <div class="subsection-title">Media principale</div>
+          <div class="inline-grid">
+            <label>Tipo media<select class="main-media-type"><option value="audio">Audio</option><option value="video">Video</option></select></label>
+            <label>File<input class="main-media-file" type="file" accept="audio/*,video/*" /></label>
+          </div>
+          <div class="subsection-title top-gap">Tessere da associare</div>
+          <div class="choice-tiles-list"></div>
+          <button type="button" class="mini-btn add-choice-tile">+ Aggiungi tessera</button>
+          <small>Seleziona una tessera come risposta corretta.</small>
+        </div>
+        <div class="full custom-field match-field hidden">
+          <div class="subsection-title">Coppie da collegare</div>
+          <div class="match-pairs-list"></div>
+          <button type="button" class="mini-btn add-match-pair">+ Aggiungi coppia</button>
+          <small>Ogni riga definisce una coppia corretta. La colonna destra viene mescolata nel player.</small>
+        </div>
       </div>
-      <div class="parsed-box"><strong>Tessere generate:</strong> <span class="parsed-tiles"></span></div>
+      <div class="tile-order-box">
+        <div class="tile-order-head">
+          <div>
+            <strong>Ordine tessere nel player</strong>
+            <div class="tile-order-help">Trascina le tessere per cambiare la disposizione. L’ordine scelto viene mantenuto nell’anteprima e nello SCORM.</div>
+          </div>
+          <div class="tile-order-actions">
+            <button type="button" class="mini-btn shuffle-tiles">Mescola</button>
+            <button type="button" class="mini-btn reset-tiles">Ordine originale</button>
+          </div>
+        </div>
+        <div class="parsed-tiles tile-sort-list" aria-label="Ordine tessere"></div>
+      </div>
     </article>
+  </template>
+
+
+  <template id="mediaTileRowTemplate">
+    <div class="asset-row media-tile-row">
+      <div class="asset-index"></div>
+      <label>Tipo<select class="asset-type"><option value="image">Immagine</option><option value="audio">Audio</option></select></label>
+      <label>File<input class="asset-file" type="file" accept="image/*,audio/*" /></label>
+      <label>Etichetta <span class="optional">(facoltativa)</span><input class="asset-label" type="text" /></label>
+      <button type="button" class="icon-btn remove-asset">×</button>
+    </div>
+  </template>
+  <template id="choiceTileRowTemplate">
+    <div class="asset-row choice-tile-row">
+      <label class="correct-radio"><input class="choice-correct" type="radio" /> Corretta</label>
+      <label>Tipo<select class="asset-type"><option value="text">Testo</option><option value="image">Immagine</option><option value="audio">Audio</option></select></label>
+      <label class="asset-text-wrap">Testo<input class="asset-text" type="text" /></label>
+      <label class="asset-file-wrap hidden">File<input class="asset-file" type="file" accept="image/*,audio/*" /></label>
+      <label>Etichetta <span class="optional">(facoltativa)</span><input class="asset-label" type="text" /></label>
+      <button type="button" class="icon-btn remove-asset">×</button>
+    </div>
+  </template>
+  <template id="matchPairRowTemplate">
+    <div class="match-pair-row">
+      <div class="pair-side left-side">
+        <label>Sinistra<select class="left-type"><option value="text">Testo</option><option value="image">Immagine</option></select></label>
+        <input class="left-text" type="text" placeholder="Testo" />
+        <input class="left-file hidden" type="file" accept="image/*" />
+      </div>
+      <div class="pair-arrow">↔</div>
+      <div class="pair-side right-side">
+        <label>Destra<select class="right-type"><option value="text">Testo</option><option value="image">Immagine</option></select></label>
+        <input class="right-text" type="text" placeholder="Testo" />
+        <input class="right-file hidden" type="file" accept="image/*" />
+      </div>
+      <button type="button" class="icon-btn remove-pair">×</button>
+    </div>
   </template>
 
   <script src="app.js"></script>
