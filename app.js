@@ -106,12 +106,33 @@
   function renderPreview(){
     try{
       const exercise=buildExercise();
-      const resource={id:`preview-${renderSeq++}`,title:exercise.titolo,resource_code:'BSMART_SCORM_BUILDER',assets:[{filename:'content.json'}]};
-      const fetchAsset=(asset,cb)=>{ if(asset.filename.endsWith('content.json')) cb(null,exercise); else cb(new Error(`Asset non trovato: ${asset.filename}`)); };
-      window.bSmartUi.renderExercisesPlayer('exercises-player',{resource,fetchAsset,showTitle:$('#showTitle').checked,showHelp:$('#showHelp').checked,showSolutions:$('#showSolutions').checked,defaultLang:$('#language').value,onVerify:()=>{}});
-      $('#saveState').textContent='Anteprima aggiornata';
+      const frame=$('#previewFrame');
+      const runtimeUrl=new URL('player/exercises-player.runtime.js',window.location.href).href;
+      const cssUrl=new URL('player/exercises-player.min.css',window.location.href).href;
+      const embedded=JSON.stringify(exercise).replace(/</g,'\\u003c');
+      const showSolutions=$('#showSolutions').checked;
+      const bootstrap=`(function(){
+        function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+        function fail(err){var el=document.getElementById('exercises-player');if(el)el.innerHTML='<div style="font-family:Arial,sans-serif;padding:20px;color:#7a1c1c;background:#fff7f7;height:100%;box-sizing:border-box"><h3 style="margin-top:0">Anteprima non disponibile</h3><p>'+esc(err&&err.message||err)+'</p><pre style="white-space:pre-wrap;font-size:11px">'+esc(err&&err.stack||'')+'</pre></div>';parent.postMessage({type:'bsmart-preview-error',message:String(err&&err.message||err)},'*');}
+        try{
+          if(!window.bSmartUi||typeof window.bSmartUi.renderExercisesPlayer!=='function')throw new Error('Il player bSmart non è stato caricato.');
+          var exercise=${embedded};
+          var resource={id:'preview-${renderSeq++}',title:exercise.titolo||'Esercizio',resource_code:'BSMART_SCORM_BUILDER',assets:[{filename:'content.json'}]};
+          function fetchAsset(asset,cb){setTimeout(function(){try{if(asset&&asset.filename&&asset.filename.endsWith('content.json'))cb(null,exercise);else cb(new Error('Asset non trovato: '+(asset&&asset.filename?asset.filename:'sconosciuto')));}catch(e){cb(e);}},0);}
+          window.bSmartUi.renderExercisesPlayer('exercises-player',{resource:resource,fetchAsset:fetchAsset,showTitle:${$('#showTitle').checked},showHelp:${$('#showHelp').checked},showSolutions:${showSolutions},defaultLang:${JSON.stringify($('#language').value)},onVerify:function(){}});
+          setTimeout(function(){parent.postMessage({type:'bsmart-preview-ready'},'*');},250);
+        }catch(err){console.error(err);fail(err);}
+      })();`;
+      frame.srcdoc=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="${cssUrl}"><style>html,body,#exercises-player{height:100%;margin:0}body{overflow:hidden}</style></head><body><div id="exercises-player"><p style="font-family:Arial,sans-serif;color:#fff;padding:18px">Caricamento player…</p></div><script src="${runtimeUrl}"><\/script><script>${bootstrap}<\/script></body></html>`;
+      $('#saveState').textContent='Aggiornamento anteprima…';
     }catch(err){ console.error(err); $('#saveState').textContent=`Errore: ${err.message}`; }
   }
+
+  window.addEventListener('message',(event)=>{
+    if(event.source!==$('#previewFrame').contentWindow||!event.data)return;
+    if(event.data.type==='bsmart-preview-ready') $('#saveState').textContent='Anteprima aggiornata';
+    if(event.data.type==='bsmart-preview-error') $('#saveState').textContent=`Errore: ${event.data.message}`;
+  });
 
   let previewTimer=null;
   function schedulePreview(){ clearTimeout(previewTimer); previewTimer=setTimeout(renderPreview,450); }
