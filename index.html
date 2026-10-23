@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>bSmart SCORM Builder</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="player/exercises-player.min.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">bSmart Labs</div>
+      <h1>SCORM Builder</h1>
+      <p>Tessere, media e associazioni · SCORM 1.2</p>
+    </div>
+    <div class="top-actions">
+      <button id="previewBtn" class="btn secondary">Aggiorna anteprima</button>
+      <button id="exportBtn" class="btn primary">Esporta SCORM</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="editor-panel">
+      <div class="section-card">
+        <div class="section-title-row">
+          <div>
+            <div class="section-kicker">01</div>
+            <h2>Impostazioni generali</h2>
+          </div>
+        </div>
+        <div class="form-grid two">
+          <label>Titolo esercizio<input id="title" type="text" value="Completa le frasi" /></label>
+          <label>Lingua comandi
+            <select id="language">
+              <option value="it" selected>Italiano</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </label>
+          <label>Tentativi<input id="attempts" type="number" min="0" max="99" value="3" /><small>0 = illimitati</small></label>
+          <label>Soglia superamento (%)<input id="passThreshold" type="number" min="0" max="100" value="60" /></label>
+        </div>
+        <label class="full intro-editor">Consegna iniziale (HTML: h1, h2, h3, h4, p, br, strong, em, ul, ol, li)<textarea id="introHtml" rows="5" placeholder="<h2>Leggi e completa</h2>
+<p>Ascolta gli audio e rispondi.</p>"></textarea><small>Puoi scrivere tag HTML e andare a capo. Le interruzioni di riga nel testo semplice vengono mantenute.</small></label>
+        <div class="check-grid">
+          <label><input id="showAllSteps" type="checkbox" /> Mostra tutti gli step contemporaneamente</label>
+          <label><input id="evaluateStep" type="checkbox" checked /> Verifica per step</label>
+          <label><input id="showSolutions" type="checkbox" /> Mostra soluzioni</label>
+          <label><input id="solutionsByStep" type="checkbox" /> Soluzioni a step</label>
+          <label><input id="showReset" type="checkbox" checked /> Mostra “Azzera”</label>
+          <label><input id="showHelp" type="checkbox" checked /> Mostra aiuto</label>
+          <label><input id="showTitle" type="checkbox" checked /> Mostra titolo nel player</label>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title-row">
+          <div>
+            <div class="section-kicker">02</div>
+            <h2>Step</h2>
+            <p class="muted">Crea step con tessere testuali o multimediali, media audio/video e associazioni a due colonne.</p>
+          </div>
+          <button id="addStepBtn" class="btn ghost">+ Aggiungi step</button>
+        </div>
+        <div id="steps"></div>
+      </div>
+    </section>
+
+    <aside class="preview-panel">
+      <div class="preview-head">
+        <div>
+          <div class="section-kicker">ANTEPRIMA</div>
+          <h2>Player bSmart</h2>
+        </div>
+        <div id="saveState" class="save-state">Anteprima locale</div>
+      </div>
+      <div class="preview-shell">
+        <iframe id="previewFrame" title="Anteprima esercizio bSmart" class="preview-frame"></iframe>
+      </div>
+      <div class="preview-note">
+        La preview usa il player bSmart per gli step testuali e il runtime esteso bSmart per tessere multimediali, media e collegamenti.
+      </div>
+    </aside>
+  </main>
+
+  <template id="stepTemplate">
+    <article class="step-card">
+      <div class="step-head">
+        <h3>Step <span class="step-number"></span></h3>
+        <button class="icon-btn remove-step" title="Elimina step">×</button>
+      </div>
+      <div class="form-grid">
+        <label>Modalità
+          <select class="step-mode">
+            <option value="completion">Completa con tessere</option>
+            <option value="order">Riordina / assembla frase</option>
+            <option value="mediaTiles">Completa / assembla con tessere immagine o audio</option>
+            <option value="mediaChoice">Audio / video + tessere da associare</option>
+            <option value="match">Collega due colonne</option>
+          </select>
+        </label>
+        <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
+        <label class="full">Audio dello step (facoltativo)<input class="step-audio" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" /><small>Disponibile per tutte le modalità di step. Incluso nello SCORM.</small></label>
+        <label class="full completion-field">Frasi / testo
+          <textarea class="step-content" rows="5">Je [vais] à l'école.
+Marie [reste] à la maison.</textarea>
+          <small>Puoi inserire più frasi nello stesso step. Ogni testo tra parentesi quadre diventa uno spazio.</small>
+        </label>
+        <label class="full order-field hidden">Sequenza corretta
+          <textarea class="step-order" rows="4">Je | vais | à l'école</textarea>
+          <small>Una frase per riga. Il simbolo | separa le tessere.</small>
+        </label>
+        <label class="full">Tessere distrattrici <span class="optional">(facoltative, una per riga)</span>
+          <textarea class="step-distractors" rows="3">mange
+suis</textarea>
+        </label>
+        <label>Suggerimento <span class="optional">(facoltativo)</span><input class="step-hint" type="text" /></label>
+        <div class="full custom-field media-tiles-field hidden">
+          <div class="subsection-title">Tessere immagine / audio</div>
+          <label>Testo / sequenza con spazi
+            <textarea class="media-tiles-text" rows="3">Abbina [1] e poi [2].</textarea>
+            <small>Usa [1], [2], [3]… per indicare gli slot. Ogni numero corrisponde alla tessera corretta con lo stesso numero.</small>
+          </label>
+          <div class="media-tiles-list"></div>
+          <button type="button" class="mini-btn add-media-tile">+ Aggiungi tessera</button>
+        </div>
+        <div class="full custom-field media-choice-field hidden">
+          <div class="subsection-title">Media principale</div>
+          <div class="inline-grid">
+            <label>Tipo media<select class="main-media-type"><option value="audio">Audio</option><option value="video">Video</option></select></label>
+            <label>File<input class="main-media-file" type="file" accept="audio/*,video/*" /></label>
+          </div>
+          <div class="subsection-title top-gap">Tessere da associare</div>
+          <div class="choice-tiles-list"></div>
+          <button type="button" class="mini-btn add-choice-tile">+ Aggiungi tessera</button>
+          <small>Seleziona una tessera come risposta corretta.</small>
+        </div>
+        <div class="full custom-field match-field hidden">
+          <div class="subsection-title">Coppie da collegare</div>
+          <div class="match-pairs-list"></div>
+          <button type="button" class="mini-btn add-match-pair">+ Aggiungi coppia</button>
+          <small>Ogni riga definisce una coppia corretta. La colonna destra viene mescolata nel player.</small>
+        </div>
+      </div>
+      <div class="tile-order-box">
+        <div class="tile-order-head">
+          <div>
+            <strong>Ordine tessere nel player</strong>
+            <div class="tile-order-help">Trascina le tessere per cambiare la disposizione. L’ordine scelto viene mantenuto nell’anteprima e nello SCORM.</div>
+          </div>
+          <div class="tile-order-actions">
+            <button type="button" class="mini-btn shuffle-tiles">Mescola</button>
+            <button type="button" class="mini-btn reset-tiles">Ordine originale</button>
+          </div>
+        </div>
+        <div class="parsed-tiles tile-sort-list" aria-label="Ordine tessere"></div>
+      </div>
+    </article>
+  </template>
+
+
+  <template id="mediaTileRowTemplate">
+    <div class="asset-row media-tile-row">
+      <div class="asset-index"></div>
+      <label>Tipo<select class="asset-type"><option value="image">Immagine</option><option value="audio">Audio</option></select></label>
+      <label>File<input class="asset-file" type="file" accept="image/*,audio/*" /></label>
+      <label>Etichetta <span class="optional">(facoltativa)</span><input class="asset-label" type="text" /></label>
+      <button type="button" class="icon-btn remove-asset">×</button>
+    </div>
+  </template>
+  <template id="choiceTileRowTemplate">
+    <div class="asset-row choice-tile-row">
+      <label class="correct-radio"><input class="choice-correct" type="radio" /> Corretta</label>
+      <label>Tipo<select class="asset-type"><option value="text">Testo</option><option value="image">Immagine</option><option value="audio">Audio</option></select></label>
+      <label class="asset-text-wrap">Testo<input class="asset-text" type="text" /></label>
+      <label class="asset-file-wrap hidden">File<input class="asset-file" type="file" accept="image/*,audio/*" /></label>
+      <label>Etichetta <span class="optional">(facoltativa)</span><input class="asset-label" type="text" /></label>
+      <button type="button" class="icon-btn remove-asset">×</button>
+    </div>
+  </template>
+  <template id="matchPairRowTemplate">
+    <div class="match-pair-row">
+      <div class="pair-side left-side">
+        <label>Sinistra<select class="left-type"><option value="text">Testo</option><option value="image">Immagine</option></select></label>
+        <input class="left-text" type="text" placeholder="Testo" />
+        <input class="left-file hidden" type="file" accept="image/*" />
+      </div>
+      <div class="pair-arrow">↔</div>
+      <div class="pair-side right-side">
+        <label>Destra<select class="right-type"><option value="text">Testo</option><option value="image">Immagine</option></select></label>
+        <input class="right-text" type="text" placeholder="Testo" />
+        <input class="right-file hidden" type="file" accept="image/*" />
+      </div>
+      <button type="button" class="icon-btn remove-pair">×</button>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
