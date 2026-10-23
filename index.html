@@ -43,10 +43,7 @@
           <label>Tentativi<input id="attempts" type="number" min="0" max="99" value="3" /><small>0 = illimitati</small></label>
           <label>Soglia superamento (%)<input id="passThreshold" type="number" min="0" max="100" value="60" /></label>
         </div>
-        <label class="full intro-editor">Consegna iniziale (HTML: h1, h2, h3, h4, p, br, strong, em, ul, ol, li)<textarea id="introHtml" rows="5" placeholder="<h2>Leggi e completa</h2>
-<p>Ascolta gli audio e rispondi.</p>"></textarea><small>Puoi scrivere tag HTML e andare a capo. Le interruzioni di riga nel testo semplice vengono mantenute.</small></label>
         <div class="check-grid">
-          <label><input id="showAllSteps" type="checkbox" /> Mostra tutti gli step contemporaneamente</label>
           <label><input id="evaluateStep" type="checkbox" checked /> Verifica per step</label>
           <label><input id="showSolutions" type="checkbox" /> Mostra soluzioni</label>
           <label><input id="solutionsByStep" type="checkbox" /> Soluzioni a step</label>
@@ -102,8 +99,8 @@
             <option value="match">Collega due colonne</option>
           </select>
         </label>
+        <label class="full"><input class="step-example" type="checkbox" /> Step di esempio (soluzione già visibile, non valutato)</label>
         <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
-        <label class="full">Audio dello step (facoltativo)<input class="step-audio" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" /><small>Disponibile per tutte le modalità di step. Incluso nello SCORM.</small></label>
         <label class="full completion-field">Frasi / testo
           <textarea class="step-content" rows="5">Je [vais] à l'école.
 Marie [reste] à la maison.</textarea>
