@@ -31,3 +31,15 @@ html,body{background:#f7f8f9}.xp-shell{background:#f7f8f9;font-family:muli,Arial
 .xp-all-step .xp-actions{background:#fff;border-top:1px solid #d3d3d3;padding:12px;display:flex;justify-content:center}
 .xp-all-step .xp-btn.primary{background:#26c857}
 @media(max-width:680px){.xp-footer{grid-template-columns:auto 1fr;gap:8px;flex-basis:auto}.xp-footer-left{grid-column:1}.xp-footer-center{grid-column:2;justify-self:end;flex-wrap:wrap;justify-content:end}.xp-footer-right{grid-column:1 / -1;justify-self:end}.xp-btn.primary{min-width:115px}.xp-choice.xp-tile{font-size:14px}}
+
+/* v1.6.5: footer coerente con Completa / Riordina tessere */
+.xp-shell .xp-footer.xp-native-footer{display:grid!important;grid-template-columns:1fr auto 1fr!important;align-items:center!important;min-height:64px!important;flex:0 0 64px!important;position:relative!important;padding:8px 14px!important;background:#fff!important;border-top:1px solid #d3d3d3!important}
+.xp-native-footer .xp-footer-left{grid-column:1;justify-self:start}
+.xp-native-footer .xp-footer-center{grid-column:2;justify-self:center}
+.xp-native-footer .xp-footer-right{grid-column:3;justify-self:end}
+.xp-native-footer .xp-btn.primary{background:#26c857!important;color:#fff!important;border-radius:28px!important;min-width:180px!important;min-height:42px!important;padding:9px 28px!important;font-weight:700!important}
+.xp-native-footer .xp-gear{width:42px;height:42px;border-radius:50%;background:#e6e6e6;color:#202020;border:0}
+.xp-step-navigation{display:flex;align-items:center;gap:7px;color:#777;font-size:12px}
+.xp-nav{border:0;background:#f2f2f2;color:#555;border-radius:50%;width:29px;height:29px;font-size:23px;line-height:1;cursor:pointer}
+.xp-nav:disabled{opacity:.3;cursor:default}
+@media(max-width:680px){.xp-shell .xp-footer.xp-native-footer{grid-template-columns:1fr auto 1fr!important}.xp-native-footer .xp-btn.primary{min-width:130px!important}}
