@@ -21,3 +21,12 @@ Export a ZIP from the builder, import it as SCORM 1.2 into an LMS and test: scor
 ## Current limitations
 
 The standalone runtime is a reconstruction, not V2 itself. The all-steps layout retains individual verification controls. Desktop drag/drop is enabled for text/media slots; touch uses tap-to-select/tap-to-place. Test against your target LMS before production use. Existing proprietary runtime files under `player/` are retained in this **builder distribution only** for backwards comparison, but are **not** exported to SCORM.
+
+
+## v1.7.2 — Verifica unica dell’esercizio
+
+Un solo pulsante Verifica, nella barra inferiore, valuta tutti gli step non di esempio in una sola operazione. Funziona sia con visualizzazione di tutti gli step sia con navigazione tra step. Gli step di esempio sono esclusi dal punteggio. Modificare una risposta dopo la verifica invalida il risultato precedente fino a una nuova verifica. Lo stato SCORM resta incomplete fino alla verifica globale.
+
+
+## v1.7.3
+In navigazione per step il pulsante Verifica compare solo nell’ultimo step e valuta tutto l’esercizio; in visualizzazione simultanea compare una sola volta in fondo. Rimossi i numeri di step dal player. Aggiornati i riferimenti agli asset per ridurre problemi di cache GitHub Pages.
