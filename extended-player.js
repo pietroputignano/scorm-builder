@@ -16,8 +16,8 @@
   const gear='<button class="xp-gear" type="button" aria-label="Impostazioni" title="Impostazioni">⚙</button>';
   function footerControls(step, all=false){
     const count=(exercise.steps||[]).length;
-    const navigation=count>1&&!all?`<div class="xp-step-navigation"><button class="xp-nav" id="xp-prev" ${current===0?'disabled':''} aria-label="${t.prev}" title="${t.prev}">‹</button><span>${current+1} / ${count}</span><button class="xp-nav" id="xp-next" ${current===count-1?'disabled':''} aria-label="${t.next}" title="${t.next}">›</button></div>`:'';
-    return `<div class="xp-tile-tray" id="xp-tile-tray"></div><div class="xp-footer xp-native-footer"><div class="xp-footer-left">${gear}</div><div class="xp-footer-center">${(exercise.steps||[]).some(x=>!x.isExample)?`<button class="xp-btn primary" id="xp-verify">${t.verify}</button>`:''}</div><div class="xp-footer-right">${navigation}</div></div>`;
+    const navigation=count>1&&!all?`<div class="xp-step-navigation"><button class="xp-nav" id="xp-prev" ${current===0?'disabled':''} aria-label="${t.prev}" title="${t.prev}">‹</button><button class="xp-nav" id="xp-next" ${current===count-1?'disabled':''} aria-label="${t.next}" title="${t.next}">›</button></div>`:'';
+    return `<div class="xp-tile-tray" id="xp-tile-tray"></div><div class="xp-footer xp-native-footer"><div class="xp-footer-left">${gear}</div><div class="xp-footer-center">${(all || current===count-1) && (exercise.steps||[]).some(x=>!x.isExample)?`<button class="xp-btn primary" id="xp-verify">${t.verify}</button>`:''}</div><div class="xp-footer-right">${navigation}</div></div>`;
   }
   function placeTileTray(scope){const tray=$('#xp-tile-tray',scope),tiles=$('.xp-tiles',scope);if(tray&&tiles){tray.appendChild(tiles);tray.hidden=false}else if(tray){tray.hidden=true}}
   function wireGear(){ $$('.xp-gear').forEach(b=>b.onclick=()=>{const ok=window.confirm('Vuoi azzerare le risposte di questo esercizio?');if(ok){state.steps={};state.exerciseVerified=false;persist();render()}}) };
