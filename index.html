@@ -55,6 +55,7 @@
         <label class="full" style="display:block;margin-top:16px">Consegna iniziale (HTML: h1–h4, p, br, elenchi)
           <textarea id="introHtml" rows="5" placeholder="<h2>Consegna</h2>\n<p>Leggi e completa.</p>"></textarea>
         </label>
+        <div class="attachment-editor"><strong>Allegati della consegna principale</strong><div id="introAttachments"></div><button type="button" class="mini-btn" id="addIntroAttachment">+ Aggiungi allegato</button></div>
       </div>
 
       <div class="section-card">
@@ -105,6 +106,7 @@
         </label>
         <label class="full"><input class="step-example" type="checkbox" /> Step di esempio (soluzione già visibile, non valutato)</label>
         <label>Consegna<input class="step-instruction" type="text" value="Completa la frase con le tessere corrette." /></label>
+        <div class="full attachment-editor"><strong>Allegati della consegna dello step</strong><div class="step-attachments"></div><button type="button" class="mini-btn add-step-attachment">+ Aggiungi allegato</button></div>
         <label class="full">Audio dello step <span class="optional">(facoltativo, MP3)</span><input class="step-audio" type="file" accept=".mp3,audio/mpeg" /></label>
         <label class="full completion-field">Frasi / testo
           <textarea class="step-content" rows="5">Je [vais] à l'école.
@@ -164,6 +166,7 @@ suis</textarea>
   </template>
 
 
+  <template id="attachmentRowTemplate"><div class="attachment-row"><label>Titolo visualizzato<input class="attachment-title" type="text" placeholder="Es. Ascolta il dialogo" /></label><label>File (audio, video, immagine o PDF)<input class="attachment-file" type="file" accept="audio/*,video/*,image/*,.pdf,application/pdf" /></label><button type="button" class="mini-btn remove-attachment">Rimuovi</button></div></template>
   <template id="mediaTileRowTemplate">
     <div class="asset-row media-tile-row">
       <div class="asset-index"></div>
