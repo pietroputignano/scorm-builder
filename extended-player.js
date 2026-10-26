@@ -64,13 +64,13 @@
   function renderTextTiles(step,ss,host){
     const tiles=step.builderTiles||[],assigned=ss.assigned||{},used=new Set(Object.values(ss.tileIds||{}).map(String));
     const parsed=step.builderSegments||[];
-    host.innerHTML=`<div class="xp-text">${parsed.map(seg=>seg.type==='text'?seg.html:`<span class="xp-slot ${assigned[seg.id]?'filled':''}" data-slot="${esc(seg.id)}">${assigned[seg.id]?esc(assigned[seg.id]):'&nbsp;'}</span>`).join('')}</div><div class="xp-tiles">${tiles.map((v,i)=>used.has(String(i))?'':`<button type="button" class="xp-tile" draggable="true" data-tile-index="${i}">${esc(v)}</button>`).join('')}</div>`;
+    host.innerHTML=`<div class="xp-text">${parsed.map(seg=>seg.type==='text'?seg.html:`<span class="xp-slot ${assigned[seg.id]?'filled':''}" data-slot="${esc(seg.id)}">${assigned[seg.id]?esc(assigned[seg.id]):'&nbsp;'}</span>`).join('')}</div><div class="xp-tiles">${tiles.map((v,i)=>used.has(String(i))?'':`<button type="button" class="xp-tile" data-tile-index="${i}">${esc(v)}</button>`).join('')}</div>`;
     $$('[data-tile-index]',host).forEach(btn=>btn.onclick=()=>{if(step.isExample)return;ss.selectedTile=Number(btn.dataset.tileIndex);$$('.xp-tile',host).forEach(x=>x.classList.remove('selected'));btn.classList.add('selected')});
     $$('[data-slot]',host).forEach(slot=>slot.onclick=()=>{if(step.isExample)return;const idx=Number(host.closest('[data-step-index]')?.dataset.stepIndex??current);if(ss.selectedTile!=null)assignTile(idx,slot.dataset.slot,'text',ss.selectedTile);else clearSlot(idx,slot.dataset.slot)});
   }
   function renderMediaTiles(step,ss,host){
     const tiles=step.mediaTiles||[],assigned=ss.assigned||{},used=new Set(Object.values(ss.tileIds||{}).map(String));
-    host.innerHTML=`<div class="xp-text">${(step.mediaSegments||[]).map(seg=>seg.type==='text'?seg.html:`<span class="xp-slot ${assigned[seg.id]?'filled':''}" data-slot="${esc(seg.id)}">${assigned[seg.id]?mediaHtml(tiles.find(x=>x.id===assigned[seg.id]),true):'&nbsp;'}</span>`).join('')}</div><div class="xp-tiles">${tiles.map(it=>used.has(String(it.id))?'':`<button type="button" class="xp-tile" draggable="true" data-media-id="${esc(it.id)}">${mediaHtml(it)}</button>`).join('')}</div>`;
+    host.innerHTML=`<div class="xp-text">${(step.mediaSegments||[]).map(seg=>seg.type==='text'?seg.html:`<span class="xp-slot ${assigned[seg.id]?'filled':''}" data-slot="${esc(seg.id)}">${assigned[seg.id]?mediaHtml(tiles.find(x=>x.id===assigned[seg.id]),true):'&nbsp;'}</span>`).join('')}</div><div class="xp-tiles">${tiles.map(it=>used.has(String(it.id))?'':`<button type="button" class="xp-tile" data-media-id="${esc(it.id)}">${mediaHtml(it)}</button>`).join('')}</div>`;
     $$('[data-media-id]',host).forEach(btn=>btn.onclick=e=>{if(e.target.closest('[data-audio-src]')||step.isExample)return;ss.selectedMedia=btn.dataset.mediaId;$$('.xp-tile',host).forEach(x=>x.classList.remove('selected'));btn.classList.add('selected')});
     $$('[data-slot]',host).forEach(slot=>slot.onclick=e=>{if(e.target.closest('[data-audio-src]')||step.isExample)return;const idx=Number(host.closest('[data-step-index]')?.dataset.stepIndex??current);if(ss.selectedMedia)assignTile(idx,slot.dataset.slot,'media',ss.selectedMedia);else clearSlot(idx,slot.dataset.slot)});wireAudio();
   }
@@ -80,16 +80,40 @@
   function verify(step,ss,scope=document){let ok=false;if(step.builderMode==='mediaTiles'){const expected={};(step.mediaSegments||[]).filter(x=>x.type==='slot').forEach(x=>expected[x.id]=x.answer);ok=Object.keys(expected).length>0&&Object.keys(expected).every(k=>ss.assigned&&ss.assigned[k]===expected[k])}else if(step.builderMode==='mediaChoice'){ok=!!ss.selected&&ss.selected===step.correctChoiceId}else if(step.builderMode==='match'){ok=(step.matchPairs||[]).length>0&&(step.matchPairs||[]).every(p=>ss.matches&&ss.matches[p.left.id]===p.right.id)}else{const expected={};(step.builderSegments||[]).filter(x=>x.type==='slot').forEach(x=>expected[x.id]=x.answer);ok=Object.keys(expected).length>0&&Object.keys(expected).every(k=>ss.assigned&&(ss.assigned[k]===expected[k]||(step.builderAlternatives?.[k]||[]).includes(ss.assigned[k])))}ss.verified=true;ss.correct=ok;return ok}
   function verifyExercise(){const steps=exercise.steps||[];steps.forEach((step,i)=>{if(step.isExample)return;verify(step,ensureStep(i))});state.exerciseVerified=true;persist();render()}
   function invalidateVerification(){if(!state.exerciseVerified)return;state.exerciseVerified=false;Object.values(state.steps).forEach(ss=>{ss.verified=false;delete ss.correct})}
-  // Native desktop HTML5 drag-and-drop plus pointer-driven touch dragging.
+  // Unified pointer-based dragging for mouse, pen and touch. Avoid native HTML5 DnD,
+  // which is inconsistent inside previews and for buttons containing audio controls.
+  let activeDrag=null;
+  const tileSelector='.xp-tile[data-tile-index],.xp-tile[data-media-id]';
   function tilePayload(tile){const card=tile.closest('[data-step-index]');return {kind:tile.hasAttribute('data-tile-index')?'text':'media',id:tile.hasAttribute('data-tile-index')?tile.dataset.tileIndex:tile.dataset.mediaId,index:card?Number(card.dataset.stepIndex):current}}
   function slotIndex(slot){const card=slot.closest('[data-step-index]');return card?Number(card.dataset.stepIndex):current}
-  root.addEventListener('dragstart',e=>{const tile=e.target.closest('.xp-tile[data-tile-index],.xp-tile[data-media-id]');if(!tile||!e.dataTransfer)return;e.dataTransfer.setData('text/plain',JSON.stringify(tilePayload(tile)));e.dataTransfer.effectAllowed='move'});
-  root.addEventListener('dragover',e=>{if(e.target.closest('.xp-slot')){e.preventDefault();e.dataTransfer.dropEffect='move'}});
-  root.addEventListener('drop',e=>{const slot=e.target.closest('.xp-slot');if(!slot)return;e.preventDefault();let payload;try{payload=JSON.parse(e.dataTransfer.getData('text/plain'))}catch(_){return}if(slotIndex(slot)!==payload.index)return;assignTile(payload.index,slot.dataset.slot,payload.kind,payload.id)});
-  let touchDrag=null;
-  root.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||e.button!==0)return;const tile=e.target.closest('.xp-tile[data-tile-index],.xp-tile[data-media-id]');if(!tile||e.target.closest('[data-audio-src]'))return;touchDrag={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,payload:tilePayload(tile),tile,ghost:null};});
-  root.addEventListener('pointermove',e=>{const d=touchDrag;if(!d||e.pointerId!==d.pointerId)return;if(!d.ghost&&Math.hypot(e.clientX-d.startX,e.clientY-d.startY)<9)return;if(!d.ghost){d.ghost=d.tile.cloneNode(true);d.ghost.classList.add('xp-drag-ghost');document.body.appendChild(d.ghost);d.tile.style.opacity='.35'}e.preventDefault();d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest('.xp-slot');$$('.xp-slot',root).forEach(x=>x.classList.toggle('xp-drop-target',x===slot));},{passive:false});
-  function endTouch(e){const d=touchDrag;if(!d||e.pointerId!==d.pointerId)return;touchDrag=null;if(d.ghost){const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest('.xp-slot');d.ghost.remove();d.tile.style.opacity='';$$('.xp-drop-target',root).forEach(x=>x.classList.remove('xp-drop-target'));if(slot&&root.contains(slot)&&slotIndex(slot)===d.payload.index){e.preventDefault();assignTile(d.payload.index,slot.dataset.slot,d.payload.kind,d.payload.id)}}}
-  root.addEventListener('pointerup',endTouch);root.addEventListener('pointercancel',endTouch);
+  function targetSlot(x,y){const el=document.elementFromPoint(x,y);return el&&el.closest('.xp-slot')}
+  function clearDrag(){const d=activeDrag;activeDrag=null;if(!d)return;if(d.ghost)d.ghost.remove();if(d.tile&&d.tile.isConnected)d.tile.style.opacity='';$$('.xp-drop-target',root).forEach(x=>x.classList.remove('xp-drop-target'));}
+  root.addEventListener('dragstart',e=>{if(e.target.closest(tileSelector))e.preventDefault()});
+  root.addEventListener('pointerdown',e=>{
+    if(e.button!==0)return;
+    const tile=e.target.closest(tileSelector);
+    if(!tile||e.target.closest('[data-audio-src]'))return;
+    const payload=tilePayload(tile);
+    if(exercise.steps?.[payload.index]?.isExample)return;
+    activeDrag={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,payload,tile,ghost:null};
+    try{tile.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  root.addEventListener('pointermove',e=>{
+    const d=activeDrag;if(!d||e.pointerId!==d.pointerId)return;
+    d.x=e.clientX;d.y=e.clientY;
+    if(!d.ghost&&Math.hypot(e.clientX-d.startX,e.clientY-d.startY)<6)return;
+    if(!d.ghost){d.ghost=d.tile.cloneNode(true);d.ghost.removeAttribute('id');d.ghost.classList.add('xp-drag-ghost');d.ghost.style.width=d.tile.getBoundingClientRect().width+'px';document.body.appendChild(d.ghost);d.tile.style.opacity='.25'}
+    e.preventDefault();d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';
+    const slot=targetSlot(e.clientX,e.clientY);
+    $$('.xp-slot',root).forEach(x=>x.classList.toggle('xp-drop-target',x===slot&&slotIndex(x)===d.payload.index));
+  },{passive:false});
+  root.addEventListener('pointerup',e=>{
+    const d=activeDrag;if(!d||e.pointerId!==d.pointerId)return;
+    const slot=d.ghost?targetSlot(e.clientX,e.clientY):null;
+    const valid=slot&&root.contains(slot)&&slotIndex(slot)===d.payload.index;
+    clearDrag();
+    if(valid){e.preventDefault();assignTile(d.payload.index,slot.dataset.slot,d.payload.kind,d.payload.id)}
+  });
+  root.addEventListener('pointercancel',clearDrag);
   scormInit();render();window.addEventListener('beforeunload',finish);
 })();
