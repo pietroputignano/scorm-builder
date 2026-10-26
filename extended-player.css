@@ -50,3 +50,8 @@ html,body{background:#f7f8f9}.xp-shell{background:#f7f8f9;font-family:muli,Arial
 /* v1.7.7: accepted tiles remain in their slots after checking */
 .xp-slot.xp-locked{border-color:#24bd61!important;background:#e9f9ee!important;cursor:default}
 .xp-slot.xp-locked::after{content:'✓';font-size:.65em;color:#168a41;margin-left:6px}
+
+/* v1.7.8: touch drag visual feedback */
+.xp-drag-ghost{position:fixed!important;z-index:99999!important;pointer-events:none!important;transform:translate(-50%,-50%);opacity:.9;box-shadow:0 8px 20px #0003;max-width:200px}
+.xp-slot.xp-drop-target{outline:3px solid #15a3b8;outline-offset:2px;background:#e6f9fc}
+.xp-tile[data-tile-index],.xp-tile[data-media-id]{touch-action:pan-y;user-select:none;-webkit-user-select:none}
