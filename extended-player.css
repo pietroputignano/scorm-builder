@@ -60,3 +60,6 @@ html,body{background:#f7f8f9}.xp-shell{background:#f7f8f9;font-family:muli,Arial
 .xp-tile[data-tile-index],.xp-tile[data-media-id]{touch-action:none!important;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
 .xp-tile[data-tile-index]:active,.xp-tile[data-media-id]:active{cursor:grabbing}
 .xp-drag-ghost{position:fixed!important;z-index:2147483647!important;pointer-events:none!important;transform:translate(-50%,-50%);margin:0!important}
+
+/* v1.7.10: rich text inside matching tiles */
+.xp-match-text{display:block;white-space:normal;line-height:1.45;text-align:center;overflow-wrap:anywhere}.xp-match-text strong,.xp-match-text b{font-weight:700}.xp-match-text em,.xp-match-text i{font-style:italic}
