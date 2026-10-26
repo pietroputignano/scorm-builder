@@ -4,3 +4,6 @@
 
 /* v1.7.4: editor allegati */
 .attachment-editor{margin-top:16px;padding:14px;border:1px solid #d8e1e7;border-radius:8px}.attachment-editor strong{display:block;margin-bottom:10px}.attachment-row{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:10px;margin:10px 0;padding:10px;background:#f4f7f9;border-radius:6px}.attachment-row label{min-width:0}.attachment-row input{max-width:100%}@media(max-width:700px){.attachment-row{grid-template-columns:1fr}}
+
+/* v1.7.10: multiline pair editors */
+.match-pair-row .pair-side textarea{min-height:78px;resize:vertical}
