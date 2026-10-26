@@ -55,3 +55,8 @@ html,body{background:#f7f8f9}.xp-shell{background:#f7f8f9;font-family:muli,Arial
 .xp-drag-ghost{position:fixed!important;z-index:99999!important;pointer-events:none!important;transform:translate(-50%,-50%);opacity:.9;box-shadow:0 8px 20px #0003;max-width:200px}
 .xp-slot.xp-drop-target{outline:3px solid #15a3b8;outline-offset:2px;background:#e6f9fc}
 .xp-tile[data-tile-index],.xp-tile[data-media-id]{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+
+/* v1.7.9: consistent mouse/touch pointer drag */
+.xp-tile[data-tile-index],.xp-tile[data-media-id]{touch-action:none!important;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.xp-tile[data-tile-index]:active,.xp-tile[data-media-id]:active{cursor:grabbing}
+.xp-drag-ghost{position:fixed!important;z-index:2147483647!important;pointer-events:none!important;transform:translate(-50%,-50%);margin:0!important}
